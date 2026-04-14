@@ -1,0 +1,14 @@
+{
+    "ext": "ts,json",
+    "watch": [
+        "server"
+    ],
+    "ignore": [
+        "dist",
+        "node_modules",
+        "client",
+        "app",
+        ".next"
+    ],
+    "exec": "tsc --project tsconfig.server.json && node --env-file=.env dist/app.js"
+}
