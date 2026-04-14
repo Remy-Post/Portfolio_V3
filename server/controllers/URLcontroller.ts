@@ -3,12 +3,12 @@ import URL from '../models/URL';
 
 /**
  * @swagger
- * /api/v1/URLs:
+ * /api/v1/urls:
  *   get:
  *     summary: Retrieve all URLs
  *     responses:
  *       200:
- *         description: A list of games
+ *         description: A list of URLs
  */
 export const getURLs = async (req: Request, res: Response) => {
     // use req.query property to check for any url search filter.  returns keys/vals after ? 
@@ -37,9 +37,9 @@ export const getURL = async(req: Request, res: Response) => {
 
 /**
  * @swagger
- * /api/v1/games:
+ * /api/v1/urls:
  *   post:
- *     summary: Create a new game
+ *     summary: Create a new URL
  *     requestBody: 
  *       required: true
  *       content:
@@ -47,13 +47,15 @@ export const getURL = async(req: Request, res: Response) => {
  *           schema:
  *             type: object
  *             properties:
- *               id:
- *                 type: integer
- *               title:
+ *               originalUrl:
+ *                 type: string
+ *               shortUrl:
+ *                 type: string
+ *               description:
  *                 type: string
  *     responses:
  *       201:
- *         description: Game created
+ *         description: URL created
  *       400:
  *         description: Bad request
  */
@@ -70,16 +72,16 @@ export const createURL = async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /api/v1/games/{id}:
+ * /api/v1/urls/{id}:
  *  put:
- *    summary: Update a game by id
+ *    summary: Update a URL by id
  *    parameters:
  *      - in: path
  *        name: id
  *        schema:
- *          type: integer
+ *          type: string
  *        required: true
- *        description: Numeric id of the game to update
+ *        description: URL id to update
  *    requestBody:
  *      required: true
  *      content:
@@ -87,9 +89,11 @@ export const createURL = async (req: Request, res: Response) => {
  *          schema:
  *            type: object
  *            properties:
- *              id:
- *                type: integer
- *              title:
+ *              originalUrl:
+ *                type: string
+ *              shortUrl:
+ *                type: string
+ *              description:
  *                type: string
  *    responses:
  *      204:
@@ -109,19 +113,19 @@ export const updateURL = async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /api/v1/games/{id}:
+ * /api/v1/urls/{id}:
  *  delete:
- *    summary: Remove a game by id
+ *    summary: Remove a URL by id
  *    parameters:
  *      - in: path
  *        name: id
  *        schema:
- *          type: integer
+ *          type: string
  *        required: true
- *        description: Numeric id of the game to delete
+ *        description: URL id to delete
  *    responses:
  *      204:
- *        description: Game deleted successfully
+ *        description: URL deleted successfully
  *      400:
  *        description: Id Missing - Bad Request
  */

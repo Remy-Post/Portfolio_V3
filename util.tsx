@@ -10,3 +10,6 @@ export enum Proficiency {
     Advanced = 3,
     Expert = 4
 }
+
+export const PASSWORD_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;

@@ -1,45 +1,45 @@
 import express, { Request, Response } from 'express';
-import Language from '../models/languages';
+import Project from '../models/project';
 
 /**
  * @swagger
- * /api/v1/languages:
+ * /api/v1/projects:
  *   get:
- *     summary: Retrieve all languages
+ *     summary: Retrieve all projects
  *     responses:
  *       200:
- *         description: A list of languages
+ *         description: A list of projects
  */
-export const getLanguages = async (req: Request, res: Response) => {
+export const getProjects = async (req: Request, res: Response) => {
     // use req.query property to check for any url search filter.  returns keys/vals after ? 
     const filter = req.query;
 
     // use model to query mongodb for game docs.  find() gets all docs, adding optional filter
-    const languages = await Language.find(filter);
+    const projects = await Project.find(filter);
 
-    if (!languages || languages.length === 0) {
-        return res.status(404).json({ message: 'No languages found' });
+    if (!projects || projects.length === 0) {
+        return res.status(404).json({ message: 'No projects found' });
     }
 
-    return res.status(200).json(languages);
+    return res.status(200).json(projects);
 };  
 
-export const getLanguage = async(req: Request, res: Response) => {
-    // try to fetch selected language by its id from url param
-    const language = await Language.findById(req.params.id);    
+export const getProject = async(req: Request, res: Response) => {
+    // try to fetch selected project by its id from url param
+    const project = await Project.findById(req.params.id);    
 
     // err handle
-    if (!language) { return res.status(404).json({ message: 'Language Not Found' }) }
+    if (!project) { return res.status(404).json({ message: 'Project Not Found' }) }
 
-    // return selected language
-    return res.status(200).json(language);
+    // return selected project
+    return res.status(200).json(project);
 };
 
 /**
  * @swagger
- * /api/v1/languages:
+ * /api/v1/projects:
  *   post:
- *     summary: Create a new language
+ *     summary: Create a new project
  *     requestBody: 
  *       required: true
  *       content:
@@ -53,33 +53,33 @@ export const getLanguage = async(req: Request, res: Response) => {
  *                 type: string
  *     responses:
  *       201:
- *         description: Language created
+ *         description: Project created
  *       400:
  *         description: Bad request
  */
-export const createLanguage = async (req: Request, res: Response) => {
+export const createProject = async (req: Request, res: Response) => {
     if (!req.body) {
         return res.status(400).json({ 'err': 'Invalid Request Body' }); // 400: Bad Request
     }
 
-    // add new language to db from request body via Language model
-    await Language.create(req.body);
+    // add new project to db from request body via Project model
+    await Project.create(req.body);
 
     return res.status(201).json(); // 201: resource created
 };
 
 /**
  * @swagger
- * /api/v1/languages/{id}:
+ * /api/v1/projects/{id}:
  *  put:
- *    summary: Update a language by id
+ *    summary: Update a project by id
  *    parameters:
  *      - in: path
  *        name: id
  *        schema:
  *          type: string
  *        required: true
- *        description: Language id to update
+ *        description: Project id to update
  *    requestBody:
  *      required: true
  *      content:
@@ -91,48 +91,46 @@ export const createLanguage = async (req: Request, res: Response) => {
  *                type: string
  *              color:
  *                type: string
- *              icon:
- *                type: string
  *    responses:
  *      204:
- *        description: Language updated successfully
+ *        description: Project updated successfully
  *      400:
  *        description: Id missing - Bad Requests
  */
-export const updateLanguage = async (req: Request, res: Response) => {
+export const updateProject = async (req: Request, res: Response) => {
     // validate we have an id value
     if (!req.params.id) {
         return res.status(400).json({ 'error': 'Bad Request - Id parameter missing' });
     }
 
-    await Language.findByIdAndUpdate(req.params.id, req.body);
-    return res.status(204).json({ 'msg': 'Language Updated' }); // 204: No Content
+    await Project.findByIdAndUpdate(req.params.id, req.body);
+    return res.status(204).json({ 'msg': 'Project Updated' }); // 204: No Content
 };
 
 /**
  * @swagger
- * /api/v1/languages/{id}:
+ * /api/v1/projects/{id}:
  *  delete:
- *    summary: Remove a language by id
+ *    summary: Remove a project by id
  *    parameters:
  *      - in: path
  *        name: id
  *        schema:
  *          type: string
  *        required: true
- *        description: Language id to delete
+ *        description: Project id to delete
  *    responses:
  *      204:
- *        description: Language deleted successfully
+ *        description: Project deleted successfully
  *      400:
  *        description: Id Missing - Bad Request
  */
-export const deleteLanguage = async (req: Request, res: Response) => {
+export const deleteProject = async (req: Request, res: Response) => {
      // validate we have an id value
     if (!req.params.id) {
         return res.status(400).json({ 'error': 'Bad Request - Id parameter missing' });
     }
 
-    await Language.findByIdAndDelete(req.params.id);
-     return res.status(204).json({ 'msg': 'Language Deleted' }); // 204: No Content
+    await Project.findByIdAndDelete(req.params.id);
+     return res.status(204).json({ 'msg': 'Project Deleted' }); // 204: No Content
 };

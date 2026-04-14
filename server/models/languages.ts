@@ -1,10 +1,9 @@
 import mongoose, { Model, Schema } from 'mongoose';
-import { TAILWIND_COLOR_CLASS_REGEX, URL_REGEX } from '../util';
-import { Proficiency } from '../../util';
+import { TAILWIND_COLOR_CLASS_REGEX, URL_REGEX, Proficiency } from '../util';
 
 
 
-interface ILanguage {
+export interface ILanguage {
     name: string;
     colour: string; //Tailwind CSS color code
     proficiency: Proficiency; 

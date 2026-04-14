@@ -1,7 +1,7 @@
 import mongoose, { Model, Schema } from 'mongoose';
 import { URL_REGEX } from '../util';
 
-interface IURL {
+export interface IURL {
     originalUrl: string;
     shortUrl: string;
 
