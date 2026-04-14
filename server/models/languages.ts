@@ -1,10 +1,17 @@
 import mongoose, { Model, Schema } from 'mongoose';
-import { TAILWIND_COLOR_CLASS_REGEX, URL_REGEX } from '../../util';
+import { TAILWIND_COLOR_CLASS_REGEX, URL_REGEX } from '../util';
+import { Proficiency } from '../../util';
+
+
 
 interface ILanguage {
     name: string;
-    color: string; //Tailwind CSS color code
+    colour: string; //Tailwind CSS color code
+    proficiency: Proficiency; 
+    similarLanguages: string[];
+    projects: string[];
     icon: string; //Icon name from Lucide React
+    description: string;
 }
 
 const languageSchema = new Schema<ILanguage>({
@@ -20,14 +27,14 @@ const languageSchema = new Schema<ILanguage>({
             message: 'Name must be between 1 and 50 characters'
         }
     },
-    color: {
+    colour: {
         type: String, trim: true,
-        required: [true, 'Color is required'],
+        required: [true, 'Colour is required'],
         validate: {
             validator: (value: string) => {
                return TAILWIND_COLOR_CLASS_REGEX.test(value);
               },
-            message: 'Invalid Tailwind CSS color code'
+            message: 'Invalid Tailwind CSS colour code'
         }
     },
     icon: {
@@ -44,3 +51,16 @@ const languageSchema = new Schema<ILanguage>({
 });
 
 export default mongoose.model<ILanguage>('Language', languageSchema);
+
+/**
+ * 
+ * For each coding language, Please provide this in json format.
+
+
+
+-> "name": "LANGUAGE",
+
+     "colour": "ACTUAL CSS SECONDAIRY COLOUR",
+
+     "icon" : "REPLACED WITH THE REQUESTED LANGUAGE, https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/css3/css3-original.svg
+ */
