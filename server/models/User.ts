@@ -1,5 +1,5 @@
 import mongoose, { Model, Schema } from 'mongoose';
-import { PASSWORD_REGEX } from '../../util';
+// import { PASSWORD_REGEX } from '../../util';
 
 export interface IUser {
     username: string;
@@ -16,11 +16,11 @@ const userSchema = new Schema<IUser>({
         required: [true, 'Password is required'],
         minlength: [8, 'Password must be at least 8 characters long'],
         maxlength: [100, 'Password must be less than 100 characters'],
-        validate: {
-            validator: (value: string) => {
-                return PASSWORD_REGEX.test(value);
-            },
-            message: 'Invalid Password',
-        },
+        // validate: {
+        //     validator: (value: string) => {
+        //         return PASSWORD_REGEX.test(value);
+        //     },
+        //     message: 'Invalid Password',
+        // },
     },
 });

@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     // call server api, passing cookie w/jwt to private method
     const res: Response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects`, {
         method: 'POST',
-        headers: { 
+        headers: {
             'Content-Type': 'application/json',
             'Cookie': cookieHeader
         },
