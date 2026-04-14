@@ -1,0 +1,13 @@
+French + English toggle, via imageButton component w/ flag images
+Light and dark mode toggle, via imageButton component w/ light and dark mode images
+cool cards,
+icon focused rather than text
+
+
+
+
+
+
+
+
+
