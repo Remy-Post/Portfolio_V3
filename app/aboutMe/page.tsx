@@ -27,22 +27,25 @@ export default function AboutMePage() {
     .filter((g) => g.langs.length > 0);
 
   return (
-    <div className="section py-12">
-      {/* Header */}
-      <div className="mb-14 animate-fade-up">
-        <p className="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-2">
-          About
-        </p>
-        <h1 className="font-serif text-4xl sm:text-5xl text-slate-900 mb-4">Remy Post</h1>
-        <p className="text-lg text-slate-500 leading-relaxed max-w-2xl">
-          Full-stack developer passionate about building clean, functional web applications.
-          I enjoy working across the entire stack — from database design to polished user interfaces.
-        </p>
+    <div className="section py-12 xl:grid xl:grid-cols-[1fr_3fr] xl:gap-12 xl:items-start">
+      {/* Left: Sidebar */}
+      <div className="xl:sticky xl:top-20">
+        <div className="mb-10 xl:mb-6 animate-fade-up">
+          <p className="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-2">
+            About
+          </p>
+          <h1 className="font-serif text-4xl sm:text-5xl text-slate-900 mb-3">Remy Post</h1>
+          <p className="text-slate-500 max-w-lg xl:max-w-none">
+            Full-stack developer passionate about building clean, functional web applications.
+            I enjoy working across the entire stack — from database design to polished user interfaces.
+          </p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-[1fr_3fr] gap-12 lg:gap-16">
-        {/* Left: Bio cards */}
-        <div className="lg:col-span-1 flex flex-col gap-6">
+      {/* Right: Content */}
+      <div>
+        {/* Bio cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
           {/* Location */}
           <div className="icon-card p-5 animate-fade-up" style={{ animationDelay: '0.1s' }}>
             <div className="flex items-center gap-3 mb-2">
@@ -78,41 +81,39 @@ export default function AboutMePage() {
           </div>
         </div>
 
-        {/* Right: Skills by proficiency */}
-        <div className="lg:col-span-2">
-          <h2 className="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-6 animate-fade-up">
-            Skills by proficiency
-          </h2>
+        {/* Skills by proficiency */}
+        <h2 className="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-6 animate-fade-up">
+          Skills by proficiency
+        </h2>
 
-          <div className="flex flex-col gap-8">
-            {byProficiency.map(({ level, label, langs }, gi) => (
-              <div key={level} className="animate-fade-up" style={{ animationDelay: `${0.1 + gi * 0.08}s` }}>
-                <div className="flex items-center gap-3 mb-3">
-                  <h3 className="text-sm font-semibold text-slate-700">{label}</h3>
-                  <div className="flex items-center gap-0.5">
-                    {[1, 2, 3, 4].map((i) => (
-                      <span key={i} className={`prof-dot ${i <= level ? 'prof-dot-filled' : 'prof-dot-empty'}`} />
-                    ))}
-                  </div>
-                  <span className="text-xs text-slate-400">{langs.length}</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {langs.map((lang) => (
-                    <Link
-                      key={lang._id}
-                      href={`/techStack/${lang._id}`}
-                      className="inline-flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl
-                        bg-white border border-slate-100 text-sm text-slate-700 font-medium
-                        hover:border-slate-300 hover:shadow-sm transition-all duration-200"
-                    >
-                      <img src={lang.icon} alt="" width={22} height={22} />
-                      {lang.name}
-                    </Link>
+        <div className="flex flex-col gap-8">
+          {byProficiency.map(({ level, label, langs }, gi) => (
+            <div key={level} className="animate-fade-up" style={{ animationDelay: `${0.1 + gi * 0.08}s` }}>
+              <div className="flex items-center gap-3 mb-3">
+                <h3 className="text-sm font-semibold text-slate-700">{label}</h3>
+                <div className="flex items-center gap-0.5">
+                  {[1, 2, 3, 4].map((i) => (
+                    <span key={i} className={`prof-dot ${i <= level ? 'prof-dot-filled' : 'prof-dot-empty'}`} />
                   ))}
                 </div>
+                <span className="text-xs text-slate-400">{langs.length}</span>
               </div>
-            ))}
-          </div>
+              <div className="flex flex-wrap gap-2">
+                {langs.map((lang) => (
+                  <Link
+                    key={lang._id}
+                    href={`/techStack/${lang._id}`}
+                    className="inline-flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl
+                      bg-white border border-slate-100 text-sm text-slate-700 font-medium
+                      hover:border-slate-300 hover:shadow-sm transition-all duration-200"
+                  >
+                    <img src={lang.icon} alt="" width={22} height={22} />
+                    {lang.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

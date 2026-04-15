@@ -52,7 +52,7 @@ export default function ProjectDetailPage() {
         <div>
           {/* Header */}
           <div className="animate-fade-up">
-            <h1 className="font-serif text-4xl text-slate-900 mb-4">{project.name}</h1>
+            <h1 className="font-serif text-4xl sm:text-5xl text-slate-900 mb-4">{project.name}</h1>
             <p className="text-lg text-slate-500 leading-relaxed mb-6">{project.description}</p>
           </div>
 

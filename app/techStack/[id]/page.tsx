@@ -63,7 +63,7 @@ export default function TechStackDetailPage() {
               <img src={language.icon} alt={language.name} width={48} height={48} />
             </div>
             <div>
-              <h1 className="font-serif text-4xl text-slate-900 mb-2">{language.name}</h1>
+              <h1 className="font-serif text-4xl sm:text-5xl text-slate-900 mb-2">{language.name}</h1>
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1">
                   {[1, 2, 3, 4].map((i) => (

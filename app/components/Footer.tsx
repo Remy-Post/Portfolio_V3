@@ -15,7 +15,7 @@ const SOCIAL_LINKS = [
 export default function Footer() {
   return (
     <footer className="border-t border-slate-100 bg-slate-50/60">
-      <div className="max-w-5xl xl:max-w-7xl mx-auto px-6 py-14">
+      <div className="max-w-5xl xl:max-w-7xl 3xl:max-w-[80%] mx-auto px-6 py-14">
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 items-start">
 

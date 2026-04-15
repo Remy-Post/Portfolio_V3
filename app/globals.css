@@ -3,6 +3,7 @@
 @theme {
   --font-serif: "Instrument Serif", serif;
   --font-sans: "DM Sans", sans-serif;
+  --breakpoint-3xl: 2560px;
 }
 
 html {
@@ -35,15 +36,11 @@ html {
   @apply max-w-5xl mx-auto px-6 xl:max-w-7xl;
 }
 
-/* Grid row for paired sections at XL+ */
-.section-row {
-  @apply xl:max-w-7xl xl:mx-auto xl:px-6 xl:grid xl:gap-12 xl:items-start;
-}
-
-/* Child .section inside a grid row yields its own constraints */
-.section-row > .section,
-.section-row > * > .section {
-  @apply xl:max-w-none xl:mx-0 xl:px-0;
+/* Ultra-wide: dynamic 10%/80%/10% boundaries */
+@media (min-width: 2560px) {
+  .section {
+    max-width: 80%;
+  }
 }
 
 /* Icon card shared hover */

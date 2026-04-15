@@ -16,7 +16,7 @@ export default function Nav() {
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 bg-white/90 backdrop-blur-xl border-b border-slate-100">
-      <nav className="max-w-5xl xl:max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+      <nav className="max-w-5xl xl:max-w-7xl 3xl:max-w-[80%] mx-auto px-6 h-14 flex items-center justify-between">
         {/* Monogram */}
         <Link href="/" className="font-serif text-2xl text-slate-900 tracking-tight leading-none">
           RP
