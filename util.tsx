@@ -4,13 +4,20 @@ export const URL_REGEX =
 export const TAILWIND_COLOR_CLASS_REGEX =
   /^(?:bg|text|border|from|to|via|ring|fill|stroke)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(?:50|100|200|300|400|500|600|700|800|900|950)$/;
 
-export enum Proficiency {
-    Beginner = 1,
-    Intermediate = 2,
-    Advanced = 3,
-    Expert = 4
-}
-
 export const PASSWORD_REGEX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
 
+
+
+
+export enum Theme {
+  Light = 1,
+  Dark = 0
+}
+
+export enum Proficiency {
+  Beginner = 1,
+  Intermediate = 2,
+  Advanced = 3,
+  Expert = 4
+}

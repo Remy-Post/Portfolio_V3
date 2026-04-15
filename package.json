@@ -9,6 +9,7 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "express": "^5.2.1",
+    "lucide-react": "^1.8.0",
     "mongoose": "^9.4.1",
     "next": "^16.2.3",
     "react": "^19.2.5",

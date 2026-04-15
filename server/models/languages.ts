@@ -4,6 +4,7 @@ import { TAILWIND_COLOR_CLASS_REGEX, URL_REGEX, Proficiency } from '../util';
 
 
 export interface ILanguage {
+    _id: string;
     name: string;
     colour: string; //Tailwind CSS color code
     proficiency: Proficiency; 
@@ -14,6 +15,11 @@ export interface ILanguage {
 }
 
 const languageSchema = new Schema<ILanguage>({
+    _id: {
+        type: String,
+        default: () => new mongoose.Types.ObjectId().toString(),
+        required: true,
+    },
     name: {
         type: String,
         required: [true, 'Name is required'],

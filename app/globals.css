@@ -1,1 +1,11 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300..500;1,9..40,300..500&display=swap");
+
+@theme {
+  --font-serif: "Instrument Serif", serif;
+  --font-sans: "DM Sans", sans-serif;
+}
+
+html {
+  font-family: var(--font-sans);
+}
