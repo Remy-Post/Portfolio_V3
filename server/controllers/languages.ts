@@ -1,5 +1,6 @@
-import express, { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import Language from '../models/languages';
+import Project from '../models/project';
 
 /**
  * @swagger
@@ -11,27 +12,21 @@ import Language from '../models/languages';
  *         description: A list of languages
  */
 export const getLanguages = async (req: Request, res: Response) => {
-    // use req.query property to check for any url search filter.  returns keys/vals after ? 
     const filter = req.query;
-
-    // use model to query mongodb for game docs.  find() gets all docs, adding optional filter
-    const languages = await Language.find(filter);
+    const languages = await Language.find(filter).populate('projects');
 
     if (!languages || languages.length === 0) {
         return res.status(404).json({ message: 'No languages found' });
     }
 
     return res.status(200).json(languages);
-};  
+};
 
 export const getLanguage = async(req: Request, res: Response) => {
-    // try to fetch selected language by its id from url param
-    const language = await Language.findById(req.params.id);    
+    const language = await Language.findById(req.params.id).populate('projects');
 
-    // err handle
     if (!language) { return res.status(404).json({ message: 'Language Not Found' }) }
 
-    // return selected language
     return res.status(200).json(language);
 };
 
@@ -40,7 +35,7 @@ export const getLanguage = async(req: Request, res: Response) => {
  * /api/v1/languages:
  *   post:
  *     summary: Create a new language
- *     requestBody: 
+ *     requestBody:
  *       required: true
  *       content:
  *         application/json:
@@ -59,13 +54,20 @@ export const getLanguage = async(req: Request, res: Response) => {
  */
 export const createLanguage = async (req: Request, res: Response) => {
     if (!req.body) {
-        return res.status(400).json({ 'err': 'Invalid Request Body' }); // 400: Bad Request
+        return res.status(400).json({ 'err': 'Invalid Request Body' });
     }
 
-    // add new language to db from request body via Language model
-    await Language.create(req.body);
+    const language = await Language.create(req.body);
 
-    return res.status(201).json(); // 201: resource created
+    // Sync: add this language to each referenced project's languages array
+    if (language.projects && language.projects.length > 0) {
+        await Project.updateMany(
+            { _id: { $in: language.projects } } as any,
+            { $addToSet: { languages: language._id } } as any
+        );
+    }
+
+    return res.status(201).json();
 };
 
 /**
@@ -100,13 +102,40 @@ export const createLanguage = async (req: Request, res: Response) => {
  *        description: Id missing - Bad Requests
  */
 export const updateLanguage = async (req: Request, res: Response) => {
-    // validate we have an id value
     if (!req.params.id) {
         return res.status(400).json({ 'error': 'Bad Request - Id parameter missing' });
     }
 
+    const oldLanguage = await Language.findById(req.params.id);
+    if (!oldLanguage) {
+        return res.status(404).json({ message: 'Language Not Found' });
+    }
+
     await Language.findByIdAndUpdate(req.params.id, req.body);
-    return res.status(204).json({ 'msg': 'Language Updated' }); // 204: No Content
+
+    // Sync projects if the projects array changed
+    if (req.body.projects) {
+        const oldProjectIds = (oldLanguage.projects || []).map((id: any) => id.toString());
+        const newProjectIds = (req.body.projects || []).map((id: any) => id.toString());
+
+        const removed = oldProjectIds.filter((id: string) => !newProjectIds.includes(id));
+        if (removed.length > 0) {
+            await Project.updateMany(
+                { _id: { $in: removed } } as any,
+                { $pull: { languages: oldLanguage._id } } as any
+            );
+        }
+
+        const added = newProjectIds.filter((id: string) => !oldProjectIds.includes(id));
+        if (added.length > 0) {
+            await Project.updateMany(
+                { _id: { $in: added } } as any,
+                { $addToSet: { languages: oldLanguage._id } } as any
+            );
+        }
+    }
+
+    return res.status(204).json({ 'msg': 'Language Updated' });
 };
 
 /**
@@ -128,11 +157,16 @@ export const updateLanguage = async (req: Request, res: Response) => {
  *        description: Id Missing - Bad Request
  */
 export const deleteLanguage = async (req: Request, res: Response) => {
-     // validate we have an id value
     if (!req.params.id) {
         return res.status(400).json({ 'error': 'Bad Request - Id parameter missing' });
     }
 
+    // Remove this language from all projects that reference it
+    await Project.updateMany(
+        { languages: req.params.id } as any,
+        { $pull: { languages: req.params.id } } as any
+    );
+
     await Language.findByIdAndDelete(req.params.id);
-     return res.status(204).json({ 'msg': 'Language Deleted' }); // 204: No Content
+    return res.status(204).json({ 'msg': 'Language Deleted' });
 };

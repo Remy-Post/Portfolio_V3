@@ -1,13 +1,15 @@
-import mongoose, { Model, Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import { URL_REGEX } from '../util';
+import type { ILanguage } from './languages';
 
 export interface IProject {
+    _id: string;
     name: string;
     description: string;
     shortDescription: string;
     url: string;
     githubUrl: string;
-    languages: string[];
+    languages: mongoose.Types.ObjectId[] | ILanguage[];
 }
 
 const projectSchema = new Schema<IProject>({
@@ -46,12 +48,11 @@ const projectSchema = new Schema<IProject>({
             },
             message: 'Invalid GitHub URL',
         },
-    },  
-    languages: {
-        type: [String],
-        required: [true, 'Languages are required'],
+    },
+    languages: [{
+        type: Schema.Types.ObjectId,
         ref: 'Language',
-    }
+    }],
 });
 
 export default mongoose.model<IProject>('Project', projectSchema);
