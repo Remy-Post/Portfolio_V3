@@ -1,5 +1,6 @@
-import express, { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import Project from '../models/project';
+import Language from '../models/languages';
 
 /**
  * @swagger
@@ -11,27 +12,21 @@ import Project from '../models/project';
  *         description: A list of projects
  */
 export const getProjects = async (req: Request, res: Response) => {
-    // use req.query property to check for any url search filter.  returns keys/vals after ? 
     const filter = req.query;
-
-    // use model to query mongodb for game docs.  find() gets all docs, adding optional filter
-    const projects = await Project.find(filter);
+    const projects = await Project.find(filter).populate('languages');
 
     if (!projects || projects.length === 0) {
         return res.status(404).json({ message: 'No projects found' });
     }
 
     return res.status(200).json(projects);
-};  
+};
 
 export const getProject = async(req: Request, res: Response) => {
-    // try to fetch selected project by its id from url param
-    const project = await Project.findById(req.params.id);    
+    const project = await Project.findById(req.params.id).populate('languages');
 
-    // err handle
     if (!project) { return res.status(404).json({ message: 'Project Not Found' }) }
 
-    // return selected project
     return res.status(200).json(project);
 };
 
@@ -40,7 +35,7 @@ export const getProject = async(req: Request, res: Response) => {
  * /api/v1/projects:
  *   post:
  *     summary: Create a new project
- *     requestBody: 
+ *     requestBody:
  *       required: true
  *       content:
  *         application/json:
@@ -59,13 +54,20 @@ export const getProject = async(req: Request, res: Response) => {
  */
 export const createProject = async (req: Request, res: Response) => {
     if (!req.body) {
-        return res.status(400).json({ 'err': 'Invalid Request Body' }); // 400: Bad Request
+        return res.status(400).json({ 'err': 'Invalid Request Body' });
     }
 
-    // add new project to db from request body via Project model
-    await Project.create(req.body);
+    const project = await Project.create(req.body);
 
-    return res.status(201).json(); // 201: resource created
+    // Sync: add this project to each referenced language's projects array
+    if (project.languages && project.languages.length > 0) {
+        await Language.updateMany(
+            { _id: { $in: project.languages } } as any,
+            { $addToSet: { projects: project._id } } as any
+        );
+    }
+
+    return res.status(201).json();
 };
 
 /**
@@ -98,13 +100,40 @@ export const createProject = async (req: Request, res: Response) => {
  *        description: Id missing - Bad Requests
  */
 export const updateProject = async (req: Request, res: Response) => {
-    // validate we have an id value
     if (!req.params.id) {
         return res.status(400).json({ 'error': 'Bad Request - Id parameter missing' });
     }
 
+    const oldProject = await Project.findById(req.params.id);
+    if (!oldProject) {
+        return res.status(404).json({ message: 'Project Not Found' });
+    }
+
     await Project.findByIdAndUpdate(req.params.id, req.body);
-    return res.status(204).json({ 'msg': 'Project Updated' }); // 204: No Content
+
+    // Sync languages if the languages array changed
+    if (req.body.languages) {
+        const oldLanguageIds = (oldProject.languages || []).map((id: any) => id.toString());
+        const newLanguageIds = (req.body.languages || []).map((id: any) => id.toString());
+
+        const removed = oldLanguageIds.filter((id: string) => !newLanguageIds.includes(id));
+        if (removed.length > 0) {
+            await Language.updateMany(
+                { _id: { $in: removed } } as any,
+                { $pull: { projects: oldProject._id } } as any
+            );
+        }
+
+        const added = newLanguageIds.filter((id: string) => !oldLanguageIds.includes(id));
+        if (added.length > 0) {
+            await Language.updateMany(
+                { _id: { $in: added } } as any,
+                { $addToSet: { projects: oldProject._id } } as any
+            );
+        }
+    }
+
+    return res.status(204).json({ 'msg': 'Project Updated' });
 };
 
 /**
@@ -126,11 +155,16 @@ export const updateProject = async (req: Request, res: Response) => {
  *        description: Id Missing - Bad Request
  */
 export const deleteProject = async (req: Request, res: Response) => {
-     // validate we have an id value
     if (!req.params.id) {
         return res.status(400).json({ 'error': 'Bad Request - Id parameter missing' });
     }
 
+    // Remove this project from all languages that reference it
+    await Language.updateMany(
+        { projects: req.params.id } as any,
+        { $pull: { projects: req.params.id } } as any
+    );
+
     await Project.findByIdAndDelete(req.params.id);
-     return res.status(204).json({ 'msg': 'Project Deleted' }); // 204: No Content
+    return res.status(204).json({ 'msg': 'Project Deleted' });
 };

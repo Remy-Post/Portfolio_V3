@@ -40,8 +40,8 @@ export function AppProvider({ children }: AppProviderProps) {
         async function fetchData() {
             try {
                 const [languagesRes, projectsRes] = await Promise.all([
-                    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/languages`),
-                    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects`),
+                    fetch(`/api/languages`),
+                    fetch(`/api/projects`),
                 ]);
 
                 if (!languagesRes.ok) throw new Error('Failed to fetch languages');

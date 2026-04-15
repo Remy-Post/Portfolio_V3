@@ -1,6 +1,6 @@
 export async function GET() {
     // make get req to fetch all games from express api.  read domain from env var
-    const res: Response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects`);
+    const res: Response = await fetch(`${process.env.NEXT_CLIENT_API_URL}/api/v1/projects`);
     return Response.json(await res.json());
 };
 
@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     const cookieHeader: string = req.headers.get('cookie') || '';
 
     // call server api, passing cookie w/jwt to private method
-    const res: Response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects`, {
+    const res: Response = await fetch(`${process.env.NEXT_CLIENT_API_URL}/api/v1/projects`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
