@@ -1,8 +1,6 @@
 'use client';
 
 import { useAppContext } from './components/AppContext';
-import { ILanguage } from '../server/models/languages';
-import { IProject } from '../server/models/project';
 import Language from './components/Language';
 import Project from './components/Project';
 import Link from 'next/link';

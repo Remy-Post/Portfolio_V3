@@ -44,11 +44,11 @@ export default function Language({ language, size = 'md' }: { language: ILanguag
           <span className="text-sm font-semibold text-slate-800 leading-tight">
             {language.name}
           </span>
-          <ProficiencyDots level={language.proficiency} />
+          {size !== 'sm' && <ProficiencyDots level={language.proficiency} />}
         </div>
 
         {/* Project count badge */}
-        {language.projects && (
+        {size !== 'sm' && language.projects && (
           <span className="text-[10px] text-slate-400 font-medium">
             {(language.projects as any[]).length} project{(language.projects as any[]).length !== 1 ? 's' : ''}
           </span>
