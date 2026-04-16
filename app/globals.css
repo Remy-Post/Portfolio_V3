@@ -6,14 +6,14 @@
   --font-sans: "Switzer", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  --color-bg: #f7f5f0;
-  --color-surface: #fdfcf9;
-  --color-ink: #16181d;
-  --color-muted: #5a5a52;
-  --color-subtle: #8a887e;
-  --color-rule: #d9d4ca;
-  --color-border: #e8e3d9;
-  --color-border-strong: #c4bfb3;
+  --color-bg: #f6f2e9;
+  --color-surface: #fcf9f1;
+  --color-ink: #2a201a;
+  --color-muted: #64554a;
+  --color-subtle: #948272;
+  --color-rule: #dacfbb;
+  --color-border: #e6ddcb;
+  --color-border-strong: #bfb198;
 
   --breakpoint-3xl: 2560px;
 }

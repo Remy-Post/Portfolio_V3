@@ -62,7 +62,7 @@ export default function HeroField() {
 
     // --- Scene setup ---
     const scene = new Scene();
-    const inkColor = new Color('#16181d');
+    const inkColor = new Color('#2a201a');
 
     let width = container.clientWidth;
     let height = container.clientHeight;
