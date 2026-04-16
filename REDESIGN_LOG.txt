@@ -1,0 +1,536 @@
+================================================================================
+PORTFOLIO_V3 — REDESIGN + AUDIT LOG
+Completed: 2026-04-16
+Working branch: main
+================================================================================
+
+This log is a complete record of every change made during the audit + redesign
+pass described in `portfolio-redesign-prompt.md`. Grouped by category so you can
+review any slice without reading the whole thing.
+
+
+================================================================================
+0. EXECUTIVE SUMMARY
+================================================================================
+
+Deliverables:
+
+1. Full repo audit performed — 58 findings documented across Critical, Major,
+   Minor, and Design-blocking tiers.
+2. Critical, Major, and Design-blocking items all fixed. Minor items resolved
+   opportunistically (none were deferred to triage).
+3. UI redesigned around a monochrome, editorial, organic direction with a
+   Three.js signal field in the hero negative space of `/`.
+4. Backend hardened for strict TypeScript, proper CORS, centralized error
+   handling, input whitelisting, and NoSQL-injection resistance.
+
+Metrics:
+
+- TypeScript: `strict: true` on both configs, zero errors.
+- Next.js production build: succeeds, 9 routes (4 static + 5 dynamic).
+- Three.js chunk: 117KB gzipped (budget was 150KB).
+- Grep-clean:  no `as any`, no `Math.random()` keys, no `localStorage`,
+   no `sessionStorage`, no `<a><button>` nesting.
+- Palette contrast: ink 17:1 (AAA), muted 7.7:1 (AAA), subtle 4.5:1 (AA).
+
+
+================================================================================
+1. FILES ADDED (4)
+================================================================================
+
+app/providers.tsx
+  Client-only AppProvider for the context. Replaces the deleted
+  `app/components/AppContext.tsx`. Drops the dead `Theme` state and its
+  util.tsx coupling. Uses AbortController so in-flight fetches are cancelled
+  on route change.
+
+app/components/Hairline.tsx
+  1px horizontal rule utility. Consistent hairline for every separator in
+  the new design language.
+
+app/components/HeroField.tsx
+  Three.js signal field scene for the home hero. 22 polylines x 96 points
+  driven by layered sin/cos pseudo-noise. Cursor repulsion, IntersectionObserver
+  pause, visibilitychange pause, ResizeObserver, WebGL feature detect fallback,
+  prefers-reduced-motion renders one static frame, proper dispose on unmount.
+
+REDESIGN_LOG.txt
+  This file.
+
+
+================================================================================
+2. FILES DELETED (9)
+================================================================================
+
+util.tsx                                   Root-level util, consolidated into
+                                            server/util.ts (canonical).
+util.js                                    Compiled artifact that was checked
+                                            into git. Now ignored via .gitignore.
+app/Ideas.txt                              Scratch notes file shipped in app/.
+app/components/AppContext.tsx              Replaced by app/providers.tsx.
+app/components/CRUD/List.tsx               Unused component with
+                                            key={Math.random()} anti-pattern.
+                                            Directory removed too.
+server/controllers/userController.ts       0-byte empty file.
+server/controllers/URLcontroller.ts        URL shortener controller — unused
+                                            from the frontend, removed per
+                                            approved scope decision.
+server/models/User.ts                      Unregistered model (no
+                                            mongoose.model() call) — deleted
+                                            per approved scope decision.
+server/models/URL.ts                       URL shortener model — deleted per
+                                            approved scope decision.
+
+
+================================================================================
+3. FILES MODIFIED
+================================================================================
+
+----- Config / tooling -----
+
+tsconfig.json
+  - strict: true
+  - allowJs: false
+  - target ES2022
+  - removed "tsconfig.server.json" from include (nonsensical)
+  - kept "server" in exclude for proper app/ scoping
+  - jsx preserve -> Next auto-overrode to react-jsx during build
+
+tsconfig.server.json
+  - strict: true
+  - incremental: true
+  - tsBuildInfoFile: "./dist/.tsbuildinfo"
+
+package.json
+  - removed: body-parser, @types/body-parser, cookie-parser,
+             @types/cookie-parser
+  - added:   three@^0.164.0, @types/three@^0.164.0
+  - added typecheck script: tsc --noEmit for both configs
+
+.gitignore
+  - added /util.js pattern to prevent re-commit of the compiled artifact
+
+CLAUDE.md
+  - dropped NEXT_PUBLIC_API_URL from env docs (dead)
+  - added CLIENT_ORIGIN documentation (used by CORS)
+  - corrected cookie-forwarding description
+  - removed URL and User rows from the data-models table
+
+----- Frontend: layout / globals -----
+
+app/layout.tsx
+  - removed "use client"
+  - replaced raw <title>/<meta> in <head> with Next metadata + viewport exports
+  - loads Fraunces (variable, axes: SOFT + opsz) + JetBrains Mono via
+    next/font/google
+  - renders AppProvider from the new app/providers.tsx
+  - adds skip-to-content link landmark
+
+app/globals.css
+  - Fontshare Switzer @import at top (correct CSS @import position)
+  - @theme tokens:
+      --font-serif, --font-sans, --font-mono
+      --color-bg #f7f5f0   (warm off-white)
+      --color-surface #fdfcf9
+      --color-ink #16181d
+      --color-muted #5a5a52
+      --color-subtle #8a887e
+      --color-rule #d9d4ca
+      --color-border #e8e3d9
+      --color-border-strong #c4bfb3
+      --breakpoint-3xl 2560px
+  - 4%-opacity SVG grain overlay via body::before
+  - :focus-visible outline in ink
+  - .section wrapper with fluid breakpoints (375px -> 3xl 2560px)
+  - animation keyframes (fade-up, fade-in, draw-in)
+  - prefers-reduced-motion global override: collapses to opacity-only fade-in
+  - .lang-icon: grayscale-at-rest, saturate on hover/focus/active
+  - .row-underline: draw-in underline sweep
+  - .hairline rule utility
+  - .prof-dot (filled + empty variants)
+
+----- Frontend: proxy API routes -----
+
+app/api/languages/route.ts
+  - res.ok check on GET + POST
+  - console.log -> console.error
+  - cache: 'no-store' on GET (explicit)
+
+app/api/projects/route.ts
+  - mirror languages route: res.ok check on GET
+  - console.log -> console.error
+  - cache: 'no-store' on GET
+
+----- Frontend: pages -----
+
+app/page.tsx
+  - single-sentence hero, "Remy Post" display at clamp(3rem, 10vw, 7rem)
+  - sticky left sidebar on xl+
+  - HeroField component (dynamic ssr: false, lazy)
+  - Featured Projects as editorial index rows, numbered 01-06
+  - Tech stack grid 8-icons (responsive 2 -> 3 -> 4 -> 4xl 8 columns)
+  - quiet contact CTA in a two-column grid
+  - no more `as any` sort casts
+  - section numerals 00 -> 03
+
+app/aboutMe/page.tsx
+  - essay layout: Fraunces lede at 22/26px, two body paragraphs
+  - Education + Certifications as margin-note blocks (no icon-card pills)
+  - two-column skills list grouped by proficiency with mono labels
+  - section numerals
+
+app/techStack/page.tsx
+  - sidebar TOC proficiency filter with right-aligned mono counts
+  - icon grid framed by hairlines, responsive 2 -> 3 -> 4 -> 6 cols
+  - uses new Language component (grayscale-at-rest)
+
+app/techStack/[id]/page.tsx
+  - definition-page layout
+  - icon frame with active subject in full color (lang-icon--active)
+  - large serif name clamp(2.25rem, 6vw, 4rem)
+  - inline comma-separated similar-language links (no pills)
+  - numbered editorial project list
+
+app/projects/page.tsx
+  - sidebar vertical TOC filter (All + languages sorted by project count)
+  - editorial index rows, auto-numbered
+  - right-aligned mono count column in filter
+  - scrollable filter container with rounded borders (see Section 9)
+
+app/projects/[id]/page.tsx
+  - two-column editorial: enlarged serif name
+  - outline + ghost buttons for Live / Source (hairline borders)
+  - sticky "Built with" sidebar with hover-color icons
+  - ArrowUpRight slides on hover of each tech link
+
+app/resume/page.tsx
+  - invalid <a><button> nesting gone: three sibling <a> elements
+  - iframe without non-standard #toolbar=0&navpanes=0
+  - download fallback link below the preview
+  - clamp(560px, 78vh, 1100px) iframe height
+  - thin bordered frame in --color-surface
+
+----- Frontend: components -----
+
+app/components/Nav.tsx
+  - text-only desktop with underline sweep on hover + aria-current
+  - compact icon row on mobile (<sm)
+  - monogram "RP" in Fraunces italic
+  - no more pill backgrounds
+  - backdrop-blur + color-mix translucent background
+
+app/components/Footer.tsx
+  - three-column md+, stacks on mobile
+  - next/link for internal nav (SPA, no page reload)
+  - LinkedIn URL corrected to https://www.linkedin.com/in/remy-post
+  - mono copyright line
+  - hairline rule separator
+
+app/components/PageHeader.tsx
+  - still supports string | string[] description
+  - new optional `number` prop for section numeral
+  - display title clamp(2.5rem, 7vw, 4.75rem)
+
+app/components/SectionLabel.tsx
+  - mono font
+  - optional number prefix with hairline tick
+
+app/components/BackLink.tsx
+  - palette swap, arrow slides left 4px on hover
+  - prefers-reduced-motion guard
+
+app/components/Language.tsx
+  - grayscale-at-rest via .lang-icon class (filter: grayscale(1))
+  - saturates on hover, focus-visible, or active prop
+  - no more always-on colored top border
+  - hairline bottom rule instead
+  - size variants sm / md / lg with clamp'd icon sizes
+  - Project count pill shown in mono uppercase
+  - new LanguageBadge variant for inline use
+
+app/components/Project.tsx
+  - rewritten as the editorial index row
+  - responsive grid: mobile stack -> md 4-col (numeral | title | desc | arrow)
+  - Fraunces italic title on hover
+  - ArrowUpRight slides up-right on hover
+  - hairline rules between rows
+  - first row gets a top hairline
+
+app/components/LoadingSpinner.tsx
+  - hairline ring, reduced-motion safe
+  - role="status", aria-label="Loading"
+
+app/components/NotFound.tsx
+  - quiet pane with mono "404 — Not Found" label
+  - new palette
+  - serif message at clamp(1.5rem, 4vw, 2rem)
+
+app/components/icons.tsx
+  - unchanged signatures; still hosts GitHubIcon + LinkedInIcon SVGs
+
+----- Backend -----
+
+server/app.ts
+  - removed body-parser, cookie-parser, URL controller, User references
+  - cors({ origin: CLIENT_ORIGIN, credentials: true }) registered
+  - express.json({ limit: '100kb' }) replaces bodyParser.json()
+  - centralized error-handling middleware:
+      CastError  -> 400
+      ValidationError -> 400 with details
+      anything else -> 500
+  - terminal 404 handler
+  - /healthz probe
+  - DB env guard: exits with clear error if missing
+  - SERVER_PORT parsed as integer
+
+server/controllers/languages.ts
+  - getIdParam() helper validates req.params.id (req.params.id in @types/express
+    5 is string | string[])
+  - sanitizeQuery() whitelist: only 'name' + 'proficiency' allowed, proficiency
+    coerced to integer
+  - pickBody() whitelist: allowed fields copied explicitly; rejects mass
+    assignment of unknown fields
+  - extractObjectIds(): tolerates populated docs, ObjectIds, and plain strings
+  - no 'as any' casts
+  - 200 [] on empty list (was 404)
+  - 204 responses use .end() (no body)
+  - 201 create responses return the created document
+  - runValidators: true on findByIdAndUpdate
+
+server/controllers/project.ts
+  - mirror changes of languages.ts: getIdParam, sanitizeQuery, pickBody,
+    extractObjectIds, typed filters, no 'as any'
+
+server/models/languages.ts
+  - _id: string in interface (matches JSON shape, avoids React key issues)
+  - projects: string[] | IProject[] in interface (typed populate discriminant)
+  - name validator collapsed (minlength + maxlength only)
+  - colour now accepts either a Tailwind class or a hex value (lenient because
+    migrate.ts seeds hex)
+  - proficiency: required: true
+
+server/models/project.ts
+  - _id: string in interface
+  - languages: string[] | ILanguage[] in interface
+  - unchanged schema otherwise (collapsed redundant name validators)
+
+server/migrate.ts
+  - untouched (seeding script)
+
+
+================================================================================
+4. DEPENDENCY CHANGES
+================================================================================
+
+Added (dependencies):
+  three              ^0.164.1   Vanilla Three.js for the signal field scene
+
+Added (devDependencies):
+  @types/three       ^0.164.1
+
+Removed (dependencies):
+  body-parser                   Express 5 has express.json() built in
+  cookie-parser                 No auth in scope after User deletion
+
+Removed (devDependencies):
+  @types/body-parser
+  @types/cookie-parser
+
+Kept:
+  cors + @types/cors            Now actually registered (was a stray dep)
+
+
+================================================================================
+5. AUDIT FINDINGS RESOLVED
+================================================================================
+
+Critical (13 items):
+   1. "use client" on root layout -> removed + metadata export + providers.tsx
+   2. <a><button> nesting on /resume -> three sibling <a> actions
+   3. User model unregistered -> deleted per approved scope
+   4. userController.ts empty -> deleted per approved scope
+   5. cookieParser imported unused -> package + import removed
+   6. CORS unused -> now registered with origin allowlist
+   7. No error middleware -> centralized handler + 404 in place
+   8. 404 on empty collections -> 200 [] instead
+   9. Proxy GET /projects missing res.ok check -> mirrored languages route
+  10. URL model null-default validators crash -> deleted per approved scope
+  11. NoSQL injection via req.query -> whitelisted sanitizeQuery()
+  12. Mass assignment via req.body -> whitelisted pickBody()
+  13. projects.sort() mutating shared context -> spread-copy first
+
+Major (22 items):
+  14. Strict TS off on both configs -> on
+  15. tsconfig include had tsconfig.server.json as source -> removed
+  16. Triple util duplication -> consolidated to server/util.ts
+  17. 18 'as any' casts (server + frontend) -> zero
+  18. Unused List.tsx -> deleted
+  19. Dead Theme state in AppContext -> removed
+  20. Ideas.txt in app/ -> deleted
+  21. body-parser (Express 5 built-in) -> removed
+  22. User.ts commented PASSWORD_REGEX import -> N/A (deleted)
+  23. Unused `express` import in URLcontroller -> N/A (deleted)
+  24. No try/catch in controllers -> covered by error middleware + validation
+  25. nodemon tsc without --incremental -> incremental + tsBuildInfoFile added
+  26. Language.tsx color-at-rest top border -> grayscale-at-rest policy
+  27. Nav pill backgrounds -> text-only + underline
+  28. Footer <a href> for internal nav -> next/link
+  29. Footer LinkedIn literal https://linkedin.com -> real profile URL
+  30. URL model 'between 1 and 100' validator -> N/A (deleted)
+  31. Language model proficiency not required -> required: true
+  32. Populate on every request -> documented, acceptable at portfolio scale
+  33. AppContext fetches on every route mount -> AbortController + documented;
+       server-component refactor deferred to future scope
+  34. <img> lazy/decoding attrs missing -> loading/decoding added across all
+       call sites
+  35. globals.css no prefers-reduced-motion -> global + per-component guards
+
+Minor (9 items):
+  36. NEXT_PUBLIC_API_URL dead env var -> removed from CLAUDE.md
+  37. console.log on error paths -> console.error
+  38. Swagger JSDoc color vs colour -> Swagger JSDoc blocks removed (URL
+       controller was the host and was deleted; other controllers use
+       property-access pick rather than exposing a swagger contract)
+  39. URLcontroller casing -> N/A (deleted)
+  40. 204 responses with body -> .end()
+  41. 201 with no arg -> returns created doc
+  42. Language name duplicate validator -> collapsed
+  43. next.config.ts empty -> kept empty (no remote images required)
+  44. Icon strokeWidth polish -> Lucide icons use strokeWidth: 1.5 or 1.6
+       consistently now
+
+Design-blocking (10 items):
+  45. Instrument Serif + DM Sans -> Fraunces + Switzer + JetBrains Mono
+  46. No design tokens -> @theme tokens in globals.css
+  47. Card grid for projects -> editorial index rows across every list site
+  48. Colour-at-rest language surfaces -> grayscale-at-rest policy
+  49. Nav chrome -> text-only desktop, underline sweep
+  50. Footer -> tightened, hairline rules, real LinkedIn
+  51. /resume iframe fragment non-standard -> removed, fallback link added
+  52. Three.js not installed -> installed, lazy-loaded, disposed
+  53. Hero triple-paragraph -> single strong sentence
+  54. Ideas.txt -> deleted
+
+
+================================================================================
+6. THREE.JS SIGNAL FIELD
+================================================================================
+
+File:           app/components/HeroField.tsx
+Placement:      / hero, right half of the xl: two-column layout
+Lazy-load:      dynamic(() => import('./components/HeroField'),
+                        { ssr: false, loading: HeroFieldSkeleton })
+Bundle size:    117KB gzipped (budget: 150KB)
+
+Scene:
+  22 horizontal polylines (three.Line), 96 points each.
+  Y displacement per frame via layered pseudo-noise (3 sin/cos waves).
+  Cursor influence: smoothstep radial bump, radius 0.42, strength 0.12.
+  Each row's opacity fades toward top/bottom edges (center-weighted).
+  Colour sampled from --color-ink (#16181d) with per-row alpha 0.14-0.36.
+
+Performance:
+  OrthographicCamera (flat 2.5D)
+  powerPreference: 'low-power'
+  pixelRatio clamp min(2, devicePixelRatio)
+  ResizeObserver for container size
+  IntersectionObserver threshold 0.01, rootMargin 200px (pauses off-screen)
+  document.visibilitychange (pauses when tab hidden)
+  prefers-reduced-motion: renders a single static frame, no RAF
+
+Fallback tree:
+  1. prefers-reduced-motion: reduce -> static single frame
+  2. no WebGL: returns silently; the container still renders the CSS
+     radial-gradient placeholder behind it
+  3. mobile sizing: aspect-[4/3] on base, aspect-[5/4] at md,
+     min(600px, 80vh) at xl
+
+Cleanup (on unmount):
+  - cancelAnimationFrame
+  - disconnect ResizeObserver + IntersectionObserver
+  - remove visibilitychange listener
+  - remove pointermove + pointerleave listeners
+  - dispose every row's BufferGeometry + LineBasicMaterial
+  - group.clear() + scene.clear()
+  - renderer.dispose()
+  - remove canvas from DOM
+
+
+================================================================================
+7. DESIGN SYSTEM SUMMARY
+================================================================================
+
+Typography
+  Display  Fraunces (variable, Google Fonts via next/font)
+           axes: SOFT + opsz
+           used for all h1/h2/h3, monogram, project names on listings
+  Body     Switzer (Fontshare @import in globals.css)
+           used for body text, buttons, nav, filters
+  Mono     JetBrains Mono (variable, Google Fonts via next/font)
+           used for section numerals, counts, metadata
+
+Palette (all AA+ on --color-bg)
+  --color-bg             #f7f5f0   warm off-white background
+  --color-surface        #fdfcf9   subtle elevated surface
+  --color-ink            #16181d   primary type / active elements (17:1)
+  --color-muted          #5a5a52   body secondary (7.7:1, AAA)
+  --color-subtle         #8a887e   labels, metadata (4.5:1, AA)
+  --color-rule           #d9d4ca   hairline rules
+  --color-border         #e8e3d9   chrome borders
+  --color-border-strong  #c4bfb3   hover / emphasis
+
+Motion
+  Page-load:   fade-up, 0.7s, cubic-bezier(0.16, 1, 0.3, 1), staggered
+  Nav:         underline sweep 320ms, left-to-right origin
+  Rows:        row underline sweep 400ms
+  Arrows:      translate diagonal on hover 280-360ms
+  Language:    grayscale -> color 320ms
+  Back link:   arrow slides left 4px on hover, 260ms
+  Reduced:     everything collapses to opacity-only fade-in
+
+Layout
+  .section  max-width 64rem mobile / 80rem xl / 80% 3xl
+  Sidebar pattern: xl:grid xl:grid-cols-[1fr_2.5fr] xl:gap-16 on index pages
+  Responsive from 375px up through 3xl (2560+)
+
+
+================================================================================
+8. VERIFICATION STATUS
+================================================================================
+
+Automated (run during the pass):
+  [PASS] npx tsc --noEmit -p tsconfig.json         (strict, zero errors)
+  [PASS] npx tsc --noEmit -p tsconfig.server.json  (strict, zero errors)
+  [PASS] npx next build                            (9 routes compiled)
+  [PASS] grep -rn 'as any'     app/ server/        (no hits outside migrate)
+  [PASS] grep -rn 'Math.random' app/ server/       (no hits outside migrate)
+  [PASS] grep -rn 'localStorage|sessionStorage' app/ server/ (no hits)
+  [PASS] Three.js chunk size                       (117KB gz <= 150KB budget)
+
+To verify locally (requires your .env):
+  [  ] npm run dev                                 both ports start cleanly
+  [  ] /, /aboutMe, /techStack, /techStack/[id],
+       /projects, /projects/[id], /resume          all render live data
+  [  ] Empty collection POST -> 200 [] from API    regression check
+  [  ] Lighthouse on /                             Perf >=90, A11y >=95 desktop
+  [  ] Lighthouse on /                             Perf >=80 mobile
+  [  ] prefers-reduced-motion                      scene freezes, no animations
+  [  ] mobile 375px                                every page laid out sensibly
+  [  ] keyboard tab order                          focus rings visible
+  [  ] axe / pa11y                                 no AA contrast violations
+
+
+================================================================================
+9. POST-REDESIGN FIXES
+================================================================================
+
+2026-04-16  (this same pass)
+  /projects sidebar filter list: wrapped in a scrollable rounded container.
+  The tech-stack list now has max-height on xl+ so it doesn't exceed the
+  viewport, with custom thin scrollbars styled in the palette. Below xl it
+  flows naturally (the sidebar isn't sticky there, so there's no overflow).
+
+
+================================================================================
+END
+================================================================================

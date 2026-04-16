@@ -1,50 +1,62 @@
-import { Home, Layers, Mail } from 'lucide-react';
+import Link from 'next/link';
 import { GitHubIcon, LinkedInIcon } from './icons';
+import { Mail } from 'lucide-react';
 import SectionLabel from './SectionLabel';
 
 const NAV_LINKS = [
-  { label: 'Home',     href: '/',         Icon: Home },
-  { label: 'Projects', href: '/projects', Icon: Layers },
+  { label: 'Home',      href: '/' },
+  { label: 'About',     href: '/aboutMe' },
+  { label: 'Stack',     href: '/techStack' },
+  { label: 'Projects',  href: '/projects' },
+  { label: 'Resume',    href: '/resume' },
 ];
 
 const SOCIAL_LINKS = [
-  { label: 'GitHub',   href: 'https://github.com/Remy-Post',   Icon: GitHubIcon,   external: true  },
-  { label: 'LinkedIn', href: 'https://linkedin.com',            Icon: LinkedInIcon, external: true  },
-  { label: 'Email',    href: 'mailto:remy.post.06@gmail.com',   Icon: Mail,         external: false },
+  { label: 'GitHub',   href: 'https://github.com/Remy-Post',             Icon: GitHubIcon,   external: true  },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/remy-post',    Icon: LinkedInIcon, external: true  },
+  { label: 'Email',    href: 'mailto:remy.post.06@gmail.com',            Icon: Mail,         external: false },
 ];
 
 export default function Footer() {
   return (
-    <footer className="border-t border-slate-100 bg-slate-50/60">
-      <div className="max-w-5xl xl:max-w-7xl 3xl:max-w-[80%] mx-auto px-6 py-14">
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 items-start">
-
+    <footer
+      className="relative z-10"
+      style={{
+        borderTop: '1px solid var(--color-rule)',
+        background: 'color-mix(in srgb, var(--color-bg) 94%, var(--color-ink) 2%)',
+      }}
+    >
+      <div className="section py-14 md:py-20">
+        <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr_1fr] gap-10 md:gap-16">
           {/* Brand */}
           <div>
-            <p className="font-serif text-2xl text-slate-900 mb-2">Remy Post</p>
-            <p className="text-sm text-slate-400 leading-relaxed max-w-[22ch]">
-              Building thoughtful software, one line at a time.
+            <p
+              className="font-serif text-3xl md:text-[2.25rem] leading-none tracking-tight mb-3"
+              style={{ color: 'var(--color-ink)' }}
+            >
+              Remy Post
+            </p>
+            <p
+              className="text-sm leading-relaxed max-w-[34ch]"
+              style={{ color: 'var(--color-muted)' }}
+            >
+              Full-stack developer focused on MERN, TypeScript, and Next.js. Open to internships and co-ops.
             </p>
           </div>
 
           {/* Navigate */}
           <div>
             <SectionLabel className="mb-5">Navigate</SectionLabel>
-            <ul className="flex flex-col gap-1">
-              {NAV_LINKS.map(({ label, href, Icon }) => (
+            <ul className="flex flex-col gap-2">
+              {NAV_LINKS.map(({ label, href }) => (
                 <li key={href}>
-                  <a href={href} className="group inline-flex items-center gap-3 py-1">
-                    <span className="h-8 w-8 rounded-lg flex items-center justify-center
-                      bg-white text-slate-400 border border-slate-100
-                      group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900
-                      transition-all duration-200 shrink-0">
-                      <Icon size={14} strokeWidth={1.75} />
-                    </span>
-                    <span className="text-sm text-slate-500 group-hover:text-slate-900 transition-colors duration-200">
-                      {label}
-                    </span>
-                  </a>
+                  <Link
+                    href={href}
+                    className="footer-link inline-block text-sm transition-colors"
+                    style={{ color: 'var(--color-muted)' }}
+                  >
+                    {label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -53,18 +65,19 @@ export default function Footer() {
           {/* Connect */}
           <div>
             <SectionLabel className="mb-5">Connect</SectionLabel>
-            <div className="flex gap-2.5">
+            <div className="flex items-center gap-2.5">
               {SOCIAL_LINKS.map(({ label, href, Icon, external }) => (
                 <a
                   key={label}
                   href={href}
-                  target={external ? '_blank' : undefined}
-                  rel={external ? 'noopener noreferrer' : undefined}
                   aria-label={label}
-                  className="h-10 w-10 rounded-xl flex items-center justify-center
-                    bg-white text-slate-400 border border-slate-100
-                    hover:bg-slate-900 hover:text-white hover:border-slate-900
-                    transition-all duration-200"
+                  {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                  className="footer-social inline-flex items-center justify-center h-10 w-10 rounded-md transition-colors"
+                  style={{
+                    color: 'var(--color-muted)',
+                    border: '1px solid var(--color-rule)',
+                    background: 'transparent',
+                  }}
                 >
                   <Icon size={16} />
                 </a>
@@ -73,12 +86,44 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom */}
-        <div className="mt-12 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="text-xs text-slate-400">&copy; {new Date().getFullYear()} Remy Post</p>
-          <p className="text-xs text-slate-300">Next.js &middot; Express &middot; MongoDB</p>
+        <hr className="hairline my-10 md:my-12" />
+
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <p className="text-[11px] tracking-[0.18em] uppercase" style={{ color: 'var(--color-subtle)', fontFamily: 'var(--font-mono)' }}>
+            &copy; {new Date().getFullYear()} · Remy Post
+          </p>
+          <p className="text-[11px] tracking-[0.18em] uppercase" style={{ color: 'var(--color-subtle)', fontFamily: 'var(--font-mono)' }}>
+            Next.js · Express · MongoDB
+          </p>
         </div>
       </div>
+
+      <style>{`
+        .footer-link { position: relative; }
+        .footer-link::after {
+          content: '';
+          position: absolute;
+          left: 0; right: 0; bottom: -2px;
+          height: 1px;
+          background: var(--color-ink);
+          transform: scaleX(0);
+          transform-origin: left;
+          transition: transform 300ms cubic-bezier(0.16,1,0.3,1);
+        }
+        .footer-link:hover { color: var(--color-ink) !important; }
+        .footer-link:hover::after,
+        .footer-link:focus-visible::after { transform: scaleX(1); }
+
+        .footer-social:hover,
+        .footer-social:focus-visible {
+          color: var(--color-ink) !important;
+          border-color: var(--color-ink) !important;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .footer-link::after { transition: none; }
+        }
+      `}</style>
     </footer>
   );
 }

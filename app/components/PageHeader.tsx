@@ -1,19 +1,46 @@
 import SectionLabel from './SectionLabel';
 
-export default function PageHeader({ label, title, description }: {
+interface PageHeaderProps {
   label: string;
   title: string;
-  description: string | string[];
-}) {
-  const phrases = Array.isArray(description) ? description : [description];
+  description?: string | string[];
+  number?: string;
+}
+
+export default function PageHeader({ label, title, description, number }: PageHeaderProps) {
+  const phrases = description === undefined ? [] : Array.isArray(description) ? description : [description];
 
   return (
-    <div className="mb-10 xl:mb-6 animate-fade-up">
-      <SectionLabel className="mb-2">{label}</SectionLabel>
-      <h1 className="font-serif text-4xl sm:text-5xl text-slate-900 mb-3">{title}</h1>
-      {phrases.map((phrase, i) => (
-        <p key={i} className="text-slate-500 max-w-lg xl:max-w-none">{phrase}</p>
-      ))}
-    </div>
+    <header className="mb-10 md:mb-12 xl:mb-10 animate-fade-up">
+      <SectionLabel number={number} className="mb-4">
+        {label}
+      </SectionLabel>
+
+      <h1
+        className="font-serif leading-[0.95] tracking-[-0.02em]"
+        style={{
+          color: 'var(--color-ink)',
+          fontSize: 'clamp(2.5rem, 7vw, 4.75rem)',
+          fontWeight: 400,
+          fontStyle: 'normal',
+        }}
+      >
+        {title}
+      </h1>
+
+      {phrases.length > 0 && (
+        <div className="mt-5 flex flex-col gap-3 max-w-[42ch]">
+          {phrases.map((phrase, i) => (
+            <p
+              key={i}
+              className="text-[15px] md:text-base leading-relaxed"
+              style={{ color: 'var(--color-muted)' }}
+            >
+              {phrase}
+            </p>
+          ))}
+        </div>
+      )}
+    </header>
   );
 }

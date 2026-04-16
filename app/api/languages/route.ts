@@ -1,37 +1,32 @@
+const API = process.env.NEXT_CLIENT_API_URL;
+
 export async function GET() {
-    // make get req to fetch all games from express api.  read domain from env var
-    const res: Response = await fetch(`${process.env.NEXT_CLIENT_API_URL}/api/v1/languages`);
-    if (!res.ok) {
-        const errorText = await res.text();
-        return new Response(errorText, { status: res.status });
-    }
-    return Response.json(await res.json());
-};
+  const res = await fetch(`${API}/api/v1/languages`, { cache: 'no-store' });
+  if (!res.ok) {
+    const errorText = await res.text();
+    return new Response(errorText, { status: res.status });
+  }
+  return Response.json(await res.json());
+}
 
 export async function POST(req: Request) {
-    // read request body as json
-    const body = await req.json();
+  const body = await req.json();
+  const cookieHeader = req.headers.get('cookie') ?? '';
 
-    // get cookie w/jwt
-    const cookieHeader: string = req.headers.get('cookie') || '';
+  const res = await fetch(`${API}/api/v1/languages`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Cookie: cookieHeader,
+    },
+    body: JSON.stringify(body),
+  });
 
-    // call server api, passing cookie w/jwt to private method
-    const res: Response = await fetch(`${process.env.NEXT_CLIENT_API_URL}/api/v1/languages`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Cookie': cookieHeader
-        },
-        body: JSON.stringify(body)
-    });
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error(`API POST /api/v1/languages failed: ${errorText}`);
+    return new Response(errorText, { status: res.status });
+  }
 
-    // api call fails
-    if (!res.ok) {
-        const errorText = await res.text();
-        console.log(`API POST Error: ${errorText}`);
-        return new Response(errorText, { status: res.status });
-    }
-
-    // api call succeeds and returns only 201 created
-    return Response.json({ success: true });
+  return Response.json({ success: true });
 }

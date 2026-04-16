@@ -4,3 +4,6 @@ node_modules
 dist
 .next
 seeds/
+
+# Never commit compiled root-level util artefacts — consolidated into server/util.ts
+/util.js

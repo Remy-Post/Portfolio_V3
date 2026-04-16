@@ -25,8 +25,8 @@ Create a `.env` file at the project root (loaded by nodemon automatically):
 ```
 DB=                     # MongoDB connection string
 SERVER_PORT=4000        # Express server port
-NEXT_PUBLIC_API_URL=    # Express URL accessible from the browser (e.g. http://localhost:4000)
 NEXT_CLIENT_API_URL=    # Express URL accessible from Next.js server-side (e.g. http://localhost:4000)
+CLIENT_ORIGIN=          # Origin allowed by the Express CORS middleware (e.g. http://localhost:3000)
 ```
 
 ## Architecture
@@ -35,7 +35,7 @@ This is a **full-stack portfolio app** with a hard split between client and serv
 
 ### Client — `app/` (Next.js 16, React 19, Tailwind 4)
 
-Next.js API routes in `app/*/route.ts` act as a **proxy layer** between the browser and Express. Client components fetch `/api/*`, which forwards requests to Express with the JWT cookie forwarded in the `Authorization` header.
+Next.js API routes in `app/*/route.ts` act as a **proxy layer** between the browser and Express. Client components fetch `/api/*`, which forwards requests to Express. Cookies (if any) are forwarded through the `Cookie` header.
 
 ```
 Browser → Next.js API route (app/*/route.ts) → Express backend
@@ -58,10 +58,8 @@ TypeScript is compiled to `dist/` (`tsconfig.server.json` targets CommonJS/ES202
 
 | Model | Key fields |
 |---|---|
-| `Language` | name, colour (Tailwind class), proficiency (enum), icon (Lucide), similarLanguages[], projects[] |
+| `Language` | name, colour (Tailwind class or hex), proficiency (1–4), icon (URL), similarLanguages[], projects[] |
 | `Project` | name, description, shortDescription, url, githubUrl, languages[] |
-| `URL` | originalUrl, shortUrl, clicks, qrCode, addedAt |
-| `User` | username, password (PASSWORD_REGEX validated) |
 
 Validation helpers in `server/util.ts` are shared across models — use them when adding new fields that need URL or Tailwind color validation.
 

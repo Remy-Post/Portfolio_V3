@@ -1,170 +1,137 @@
 import { Request, Response } from 'express';
-import Project from '../models/project';
+import { Types } from 'mongoose';
+import Project, { IProject } from '../models/project';
 import Language from '../models/languages';
 
-/**
- * @swagger
- * /api/v1/projects:
- *   get:
- *     summary: Retrieve all projects
- *     responses:
- *       200:
- *         description: A list of projects
- */
+const ALLOWED_QUERY_KEYS = ['name'] as const;
+const ALLOWED_BODY_KEYS = [
+  'name',
+  'description',
+  'shortDescription',
+  'url',
+  'githubUrl',
+  'languages',
+] as const;
+
+type MongoFilter = Record<string, unknown>;
+
+function getIdParam(req: Request): string | null {
+  const raw = req.params.id;
+  const id = Array.isArray(raw) ? raw[0] : raw;
+  if (!id || !Types.ObjectId.isValid(id)) return null;
+  return id;
+}
+
+function sanitizeQuery(query: Request['query']): MongoFilter {
+  const clean: MongoFilter = {};
+  for (const key of ALLOWED_QUERY_KEYS) {
+    const raw = query[key];
+    if (typeof raw === 'string') clean[key] = raw;
+  }
+  return clean;
+}
+
+function pickBody(body: unknown): Partial<IProject> {
+  if (!body || typeof body !== 'object') return {};
+  const src = body as Record<string, unknown>;
+  const out: Record<string, unknown> = {};
+  for (const key of ALLOWED_BODY_KEYS) {
+    if (key in src && src[key] !== undefined) out[key] = src[key];
+  }
+  return out as Partial<IProject>;
+}
+
+function extractObjectIds(input: unknown): string[] {
+  if (!Array.isArray(input)) return [];
+  const ids: string[] = [];
+  for (const raw of input) {
+    if (raw instanceof Types.ObjectId) ids.push(raw.toString());
+    else if (typeof raw === 'string' && Types.ObjectId.isValid(raw)) ids.push(raw);
+    else if (raw && typeof raw === 'object' && '_id' in raw) {
+      const id = (raw as { _id: unknown })._id;
+      if (typeof id === 'string') ids.push(id);
+      else if (id instanceof Types.ObjectId) ids.push(id.toString());
+    }
+  }
+  return ids;
+}
+
 export const getProjects = async (req: Request, res: Response) => {
-    const filter = req.query;
-    const projects = await Project.find(filter).populate('languages');
-
-    if (!projects || projects.length === 0) {
-        return res.status(404).json({ message: 'No projects found' });
-    }
-
-    return res.status(200).json(projects);
+  const filter = sanitizeQuery(req.query);
+  const projects = await Project.find(filter).populate('languages');
+  return res.status(200).json(projects);
 };
 
-export const getProject = async(req: Request, res: Response) => {
-    const project = await Project.findById(req.params.id).populate('languages');
+export const getProject = async (req: Request, res: Response) => {
+  const id = getIdParam(req);
+  if (!id) return res.status(400).json({ error: 'Invalid id format' });
 
-    if (!project) { return res.status(404).json({ message: 'Project Not Found' }) }
-
-    return res.status(200).json(project);
+  const project = await Project.findById(id).populate('languages');
+  if (!project) return res.status(404).json({ error: 'Project not found' });
+  return res.status(200).json(project);
 };
 
-/**
- * @swagger
- * /api/v1/projects:
- *   post:
- *     summary: Create a new project
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               color:
- *                 type: string
- *     responses:
- *       201:
- *         description: Project created
- *       400:
- *         description: Bad request
- */
 export const createProject = async (req: Request, res: Response) => {
-    if (!req.body) {
-        return res.status(400).json({ 'err': 'Invalid Request Body' });
-    }
+  const payload = pickBody(req.body);
+  if (!payload.name || !payload.description || !payload.url || !payload.githubUrl) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
 
-    const project = await Project.create(req.body);
+  const project = await Project.create(payload);
 
-    // Sync: add this project to each referenced language's projects array
-    if (project.languages && project.languages.length > 0) {
-        await Language.updateMany(
-            { _id: { $in: project.languages } } as any,
-            { $addToSet: { projects: project._id } } as any
-        );
-    }
-
-    return res.status(201).json();
-};
-
-/**
- * @swagger
- * /api/v1/projects/{id}:
- *  put:
- *    summary: Update a project by id
- *    parameters:
- *      - in: path
- *        name: id
- *        schema:
- *          type: string
- *        required: true
- *        description: Project id to update
- *    requestBody:
- *      required: true
- *      content:
- *        application/json:
- *          schema:
- *            type: object
- *            properties:
- *              name:
- *                type: string
- *              color:
- *                type: string
- *    responses:
- *      204:
- *        description: Project updated successfully
- *      400:
- *        description: Id missing - Bad Requests
- */
-export const updateProject = async (req: Request, res: Response) => {
-    if (!req.params.id) {
-        return res.status(400).json({ 'error': 'Bad Request - Id parameter missing' });
-    }
-
-    const oldProject = await Project.findById(req.params.id);
-    if (!oldProject) {
-        return res.status(404).json({ message: 'Project Not Found' });
-    }
-
-    await Project.findByIdAndUpdate(req.params.id, req.body);
-
-    // Sync languages if the languages array changed
-    if (req.body.languages) {
-        const oldLanguageIds = (oldProject.languages || []).map((id: any) => id.toString());
-        const newLanguageIds = (req.body.languages || []).map((id: any) => id.toString());
-
-        const removed = oldLanguageIds.filter((id: string) => !newLanguageIds.includes(id));
-        if (removed.length > 0) {
-            await Language.updateMany(
-                { _id: { $in: removed } } as any,
-                { $pull: { projects: oldProject._id } } as any
-            );
-        }
-
-        const added = newLanguageIds.filter((id: string) => !oldLanguageIds.includes(id));
-        if (added.length > 0) {
-            await Language.updateMany(
-                { _id: { $in: added } } as any,
-                { $addToSet: { projects: oldProject._id } } as any
-            );
-        }
-    }
-
-    return res.status(204).json({ 'msg': 'Project Updated' });
-};
-
-/**
- * @swagger
- * /api/v1/projects/{id}:
- *  delete:
- *    summary: Remove a project by id
- *    parameters:
- *      - in: path
- *        name: id
- *        schema:
- *          type: string
- *        required: true
- *        description: Project id to delete
- *    responses:
- *      204:
- *        description: Project deleted successfully
- *      400:
- *        description: Id Missing - Bad Request
- */
-export const deleteProject = async (req: Request, res: Response) => {
-    if (!req.params.id) {
-        return res.status(400).json({ 'error': 'Bad Request - Id parameter missing' });
-    }
-
-    // Remove this project from all languages that reference it
+  const languageIds = extractObjectIds(payload.languages);
+  if (languageIds.length > 0) {
     await Language.updateMany(
-        { projects: req.params.id } as any,
-        { $pull: { projects: req.params.id } } as any
+      { _id: { $in: languageIds } },
+      { $addToSet: { projects: project._id } },
     );
+  }
 
-    await Project.findByIdAndDelete(req.params.id);
-    return res.status(204).json({ 'msg': 'Project Deleted' });
+  return res.status(201).json(project);
+};
+
+export const updateProject = async (req: Request, res: Response) => {
+  const id = getIdParam(req);
+  if (!id) return res.status(400).json({ error: 'Invalid id format' });
+
+  const existing = await Project.findById(id);
+  if (!existing) return res.status(404).json({ error: 'Project not found' });
+
+  const payload = pickBody(req.body);
+  await Project.findByIdAndUpdate(id, payload, { runValidators: true });
+
+  if (payload.languages !== undefined) {
+    const oldIds = extractObjectIds(existing.languages);
+    const newIds = extractObjectIds(payload.languages);
+
+    const removed = oldIds.filter((oid) => !newIds.includes(oid));
+    const added = newIds.filter((oid) => !oldIds.includes(oid));
+
+    if (removed.length > 0) {
+      await Language.updateMany(
+        { _id: { $in: removed } },
+        { $pull: { projects: existing._id } },
+      );
+    }
+    if (added.length > 0) {
+      await Language.updateMany(
+        { _id: { $in: added } },
+        { $addToSet: { projects: existing._id } },
+      );
+    }
+  }
+
+  return res.status(204).end();
+};
+
+export const deleteProject = async (req: Request, res: Response) => {
+  const id = getIdParam(req);
+  if (!id) return res.status(400).json({ error: 'Invalid id format' });
+
+  await Language.updateMany({ projects: id }, { $pull: { projects: id } });
+
+  const deleted = await Project.findByIdAndDelete(id);
+  if (!deleted) return res.status(404).json({ error: 'Project not found' });
+
+  return res.status(204).end();
 };

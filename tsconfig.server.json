@@ -1,15 +1,15 @@
 {
-    "compilerOptions": {
-        "rootDir": "server",
-        "outDir": "dist",
-        "module": "commonjs",
-        "target": "es2020",
-        "esModuleInterop": true,
-        "jsx": "react-jsx",
-        "types": ["node"],
-        "lib": ["es2020", "esnext.asynciterable", "esnext.disposable"]
-    },
-    "include": [
-        "server/**/*"
-    ]
+  "compilerOptions": {
+    "rootDir": "server",
+    "outDir": "dist",
+    "module": "commonjs",
+    "target": "es2020",
+    "esModuleInterop": true,
+    "strict": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "types": ["node"],
+    "lib": ["es2020", "esnext.asynciterable", "esnext.disposable"]
+  },
+  "include": ["server/**/*"]
 }
