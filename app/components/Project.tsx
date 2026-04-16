@@ -20,10 +20,10 @@ export default function Project({
   const populatedLangs = languages.filter((l): l is ILanguage => typeof l === 'object' && l !== null && '_id' in l && 'name' in l);
 
   return (
-    <article className="project-row group relative">
+    <article className="project-row group relative py-6 md:py-8">
       <Link
         href={`/projects/${project._id}`}
-        className="project-row-link block py-6 md:py-8"
+        className="project-row-link block"
         aria-label={`${project.name} — view project details`}
       >
         <div className="grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_2fr_3fr_auto] gap-4 md:gap-8 items-baseline">
@@ -79,16 +79,16 @@ export default function Project({
         >
           {project.shortDescription}
         </p>
-
-        {/* Language badges */}
-        {populatedLangs.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-4">
-            {populatedLangs.map((lang) => (
-              <LanguageBadge key={lang._id} language={lang} size="sm" />
-            ))}
-          </div>
-        )}
       </Link>
+
+      {/* Language badges — outside the main Link to avoid nested <a> */}
+      {populatedLangs.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-4 pl-[calc(1rem+2ch)] md:pl-[calc(2rem+3ch)]">
+          {populatedLangs.map((lang) => (
+            <LanguageBadge key={lang._id} language={lang} size="sm" />
+          ))}
+        </div>
+      )}
 
       <style>{`
         .project-row { border-bottom: 1px solid var(--color-rule); }

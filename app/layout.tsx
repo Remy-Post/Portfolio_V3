@@ -35,8 +35,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${jetbrainsMono.variable}`}>
-      <body>
+    <html lang="en" data-scroll-behavior="smooth" className={`${fraunces.variable} ${jetbrainsMono.variable}`}>
+      <body suppressHydrationWarning>
         <AppProvider>
           <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-[var(--color-ink)] focus:text-[var(--color-bg)] focus:px-3 focus:py-1.5 focus:text-xs">
             Skip to content
