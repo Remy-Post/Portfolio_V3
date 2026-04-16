@@ -1,7 +1,7 @@
 'use client';
 
 import PageHeader from '../components/PageHeader';
-import { Download } from 'lucide-react';
+import { Download, Mail } from 'lucide-react';
 
 export default function ResumePage() {
   const handleDownload = () => {
@@ -29,6 +29,14 @@ export default function ResumePage() {
             <Download size={15} />
             Download Resume
           </button>
+          <a href="mailto:remy.post.06@gmail.com" target="_blank" rel="noopener noreferrer">
+            <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg
+              border border-slate-200 text-sm font-medium text-slate-600
+              hover:bg-slate-50 hover:border-slate-300 transition-all duration-200">
+              <Mail size={15} />
+              Contact Me
+            </button>
+          </a>
         </div>
       </div>
 

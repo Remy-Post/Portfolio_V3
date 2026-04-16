@@ -25,11 +25,10 @@ export default function Home() {
         <PageHeader
           label="Full-Stack Developer"
           title="Remy Post"
-          description={["I build, modern, clear and functional full-stack applications. Clean code, thoughtful design, real results.", 
-            "I am a full-stack developer with a passion for building modern, clear and functional applications.",
-          "I am a full-stack developer with a passion for building modern, clear and functional applications.",
-          "I am a full-stack developer with a passion for building modern, clear and functional applications.",
-          ]}/>
+          description={["I build, modern, clear and functional full-stack applications. Clean code, thoughtful design, real results.",
+            "My passion is buiiilding back ends servers which are efficient and secure.",
+            "While I truly enjoy building front ends, my passion is building back ends",
+          ]} />
 
         <div
           className="flex items-center gap-3 mb-10 xl:mb-0 animate-fade-up"

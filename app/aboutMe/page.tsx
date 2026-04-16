@@ -35,18 +35,7 @@ export default function AboutMePage() {
       {/* Right: Content */}
       <div>
         {/* Bio cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
-          {/* Location */}
-          <div className="icon-card p-5 animate-fade-up" style={{ animationDelay: '0.1s' }}>
-            <div className="flex items-center gap-3 mb-2">
-              <span className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400">
-                <MapPin size={16} strokeWidth={1.5} />
-              </span>
-              <SectionLabel as="span">Location</SectionLabel>
-            </div>
-            <p className="text-sm text-slate-600 pl-11">Ontario, Canada</p>
-          </div>
-
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
           {/* Education */}
           <div className="icon-card p-5 animate-fade-up" style={{ animationDelay: '0.15s' }}>
             <div className="flex items-center gap-3 mb-2">
@@ -55,8 +44,9 @@ export default function AboutMePage() {
               </span>
               <SectionLabel as="span">Education</SectionLabel>
             </div>
-            <p className="text-sm text-slate-600 pl-11">Computer Programming &amp; Analysis</p>
-            <p className="text-xs text-slate-400 pl-11 mt-0.5">Details coming soon</p>
+            <p className="text-sm text-slate-600 pl-11 mb-2">Bachelor of Computer Science</p>
+              <p className="text-sm text-slate-600 pl-11 mb-2">Diploma in Computer Programming</p>
+            <p className="text-xs text-slate-400 pl-11 mt-0.5">From both Lakehead University and Georgian College</p>
           </div>
 
           {/* Certifications */}
