@@ -1,20 +1,26 @@
 import { ILanguage } from "../../server/models/languages";
 import Link from "next/link";
 
-const PROF_LABELS = ['', 'Beginner', 'Intermediate', 'Advanced', 'Expert'];
+export const PROF_LABELS = ['', 'Beginner', 'Intermediate', 'Advanced', 'Expert'];
 
-function ProficiencyDots({ level }: { level: number }) {
+export function ProficiencyDots({ level, showLabel = true, gap = 'gap-1' }: {
+  level: number;
+  showLabel?: boolean;
+  gap?: string;
+}) {
   return (
-    <div className="flex items-center gap-1">
+    <div className={`flex items-center ${gap}`}>
       {[1, 2, 3, 4].map((i) => (
         <span
           key={i}
           className={`prof-dot ${i <= level ? 'prof-dot-filled' : 'prof-dot-empty'}`}
         />
       ))}
-      <span className="text-[10px] text-slate-400 ml-1.5 font-medium">
-        {PROF_LABELS[level] || ''}
-      </span>
+      {showLabel && (
+        <span className="text-[10px] text-slate-400 ml-1.5 font-medium">
+          {PROF_LABELS[level] || ''}
+        </span>
+      )}
     </div>
   );
 }

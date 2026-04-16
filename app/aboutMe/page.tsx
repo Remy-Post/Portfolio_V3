@@ -1,22 +1,17 @@
 'use client';
 
 import { useAppContext } from '../components/AppContext';
-import { ILanguage } from '../../server/models/languages';
+import { ProficiencyDots, PROF_LABELS } from '../components/Language';
+import LoadingSpinner from '../components/LoadingSpinner';
+import PageHeader from '../components/PageHeader';
+import SectionLabel from '../components/SectionLabel';
 import Link from 'next/link';
 import { MapPin, GraduationCap, Award } from 'lucide-react';
-
-const PROF_LABELS = ['', 'Beginner', 'Intermediate', 'Advanced', 'Expert'];
 
 export default function AboutMePage() {
   const { languages, loading } = useAppContext();
 
-  if (loading) {
-    return (
-      <div className="section py-32 flex items-center justify-center">
-        <div className="h-8 w-8 border-2 border-slate-200 border-t-slate-600 rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner />;
 
   const byProficiency = [4, 3, 2, 1]
     .map((level) => ({
@@ -30,16 +25,11 @@ export default function AboutMePage() {
     <div className="section py-12 xl:grid xl:grid-cols-[1fr_3fr] xl:gap-12 xl:items-start">
       {/* Left: Sidebar */}
       <div className="xl:sticky xl:top-20">
-        <div className="mb-10 xl:mb-6 animate-fade-up">
-          <p className="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-2">
-            About
-          </p>
-          <h1 className="font-serif text-4xl sm:text-5xl text-slate-900 mb-3">Remy Post</h1>
-          <p className="text-slate-500 max-w-lg xl:max-w-none">
-            Full-stack developer passionate about building clean, functional web applications.
-            I enjoy working across the entire stack — from database design to polished user interfaces.
-          </p>
-        </div>
+        <PageHeader
+          label="About"
+          title="Remy Post"
+          description="Full-stack developer passionate about building clean, functional web applications. I enjoy working across the entire stack — from database design to polished user interfaces."
+        />
       </div>
 
       {/* Right: Content */}
@@ -52,7 +42,7 @@ export default function AboutMePage() {
               <span className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400">
                 <MapPin size={16} strokeWidth={1.5} />
               </span>
-              <span className="text-[10px] font-semibold tracking-widest uppercase text-slate-400">Location</span>
+              <SectionLabel as="span">Location</SectionLabel>
             </div>
             <p className="text-sm text-slate-600 pl-11">Ontario, Canada</p>
           </div>
@@ -63,7 +53,7 @@ export default function AboutMePage() {
               <span className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400">
                 <GraduationCap size={16} strokeWidth={1.5} />
               </span>
-              <span className="text-[10px] font-semibold tracking-widest uppercase text-slate-400">Education</span>
+              <SectionLabel as="span">Education</SectionLabel>
             </div>
             <p className="text-sm text-slate-600 pl-11">Computer Programming &amp; Analysis</p>
             <p className="text-xs text-slate-400 pl-11 mt-0.5">Details coming soon</p>
@@ -75,27 +65,23 @@ export default function AboutMePage() {
               <span className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400">
                 <Award size={16} strokeWidth={1.5} />
               </span>
-              <span className="text-[10px] font-semibold tracking-widest uppercase text-slate-400">Certifications</span>
+              <SectionLabel as="span">Certifications</SectionLabel>
             </div>
             <p className="text-xs text-slate-400 pl-11">Coming soon</p>
           </div>
         </div>
 
         {/* Skills by proficiency */}
-        <h2 className="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-6 animate-fade-up">
+        <SectionLabel as="h2" className="mb-6 animate-fade-up">
           Skills by proficiency
-        </h2>
+        </SectionLabel>
 
         <div className="flex flex-col gap-8">
           {byProficiency.map(({ level, label, langs }, gi) => (
             <div key={level} className="animate-fade-up" style={{ animationDelay: `${0.1 + gi * 0.08}s` }}>
               <div className="flex items-center gap-3 mb-3">
                 <h3 className="text-sm font-semibold text-slate-700">{label}</h3>
-                <div className="flex items-center gap-0.5">
-                  {[1, 2, 3, 4].map((i) => (
-                    <span key={i} className={`prof-dot ${i <= level ? 'prof-dot-filled' : 'prof-dot-empty'}`} />
-                  ))}
-                </div>
+                <ProficiencyDots level={level} showLabel={false} gap="gap-0.5" />
                 <span className="text-xs text-slate-400">{langs.length}</span>
               </div>
               <div className="flex flex-wrap gap-2">

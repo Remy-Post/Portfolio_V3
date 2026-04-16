@@ -4,19 +4,15 @@ import { useAppContext } from '../components/AppContext';
 import { IProject } from '../../server/models/project';
 import { ILanguage } from '../../server/models/languages';
 import Project from '../components/Project';
+import LoadingSpinner from '../components/LoadingSpinner';
+import PageHeader from '../components/PageHeader';
 import { useState } from 'react';
 
 export default function ProjectsPage() {
   const { projects, languages, loading } = useAppContext();
   const [filterLang, setFilterLang] = useState<string | null>(null);
 
-  if (loading) {
-    return (
-      <div className="section py-32 flex items-center justify-center">
-        <div className="h-8 w-8 border-2 border-slate-200 border-t-slate-600 rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner />;
 
   const filtered = filterLang
     ? projects.filter((p) =>
@@ -28,15 +24,11 @@ export default function ProjectsPage() {
     <div className="section py-12 xl:grid xl:grid-cols-[1fr_3fr] xl:gap-12 xl:items-start">
       {/* Left: Header + Filters */}
       <div className="xl:sticky xl:top-20">
-        <div className="mb-10 xl:mb-6 animate-fade-up">
-          <p className="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-2">
-            Work
-          </p>
-          <h1 className="font-serif text-4xl sm:text-5xl text-slate-900 mb-3">Projects</h1>
-          <p className="text-slate-500 max-w-lg xl:max-w-none">
-            A collection of {projects.length} projects across {languages.length} technologies.
-          </p>
-        </div>
+        <PageHeader
+          label="Work"
+          title="Projects"
+          description={`A collection of ${projects.length} projects across ${languages.length} technologies.`}
+        />
 
         {/* Language icon filter bar */}
         <div className="flex flex-wrap xl:flex-col items-center xl:items-stretch gap-2 mb-8 xl:mb-0 animate-fade-up" style={{ animationDelay: '0.1s' }}>

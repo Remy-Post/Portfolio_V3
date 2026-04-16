@@ -1,5 +1,6 @@
 import { Home, Layers, Mail } from 'lucide-react';
 import { GitHubIcon, LinkedInIcon } from './icons';
+import SectionLabel from './SectionLabel';
 
 const NAV_LINKS = [
   { label: 'Home',     href: '/',         Icon: Home },
@@ -29,9 +30,7 @@ export default function Footer() {
 
           {/* Navigate */}
           <div>
-            <p className="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-5">
-              Navigate
-            </p>
+            <SectionLabel className="mb-5">Navigate</SectionLabel>
             <ul className="flex flex-col gap-1">
               {NAV_LINKS.map(({ label, href, Icon }) => (
                 <li key={href}>
@@ -53,9 +52,7 @@ export default function Footer() {
 
           {/* Connect */}
           <div>
-            <p className="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-5">
-              Connect
-            </p>
+            <SectionLabel className="mb-5">Connect</SectionLabel>
             <div className="flex gap-2.5">
               {SOCIAL_LINKS.map(({ label, href, Icon, external }) => (
                 <a

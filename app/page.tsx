@@ -3,19 +3,16 @@
 import { useAppContext } from './components/AppContext';
 import Language from './components/Language';
 import Project from './components/Project';
+import LoadingSpinner from './components/LoadingSpinner';
+import PageHeader from './components/PageHeader';
+import SectionLabel from './components/SectionLabel';
 import Link from 'next/link';
 import { ArrowRight, Download } from 'lucide-react';
 
 export default function Home() {
   const { languages, projects, loading } = useAppContext();
 
-  if (loading) {
-    return (
-      <div className="section py-32 flex items-center justify-center">
-        <div className="h-8 w-8 border-2 border-slate-200 border-t-slate-600 rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner />;
 
   const featured = [...projects]
     .sort((a, b) => (b.languages as any[]).length - (a.languages as any[]).length)
@@ -25,18 +22,14 @@ export default function Home() {
     <div className="section py-12 xl:grid xl:grid-cols-[1fr_3fr] xl:gap-12 xl:items-start">
       {/* Left: Hero sidebar */}
       <div className="xl:sticky xl:top-20">
-        <div className="mb-10 xl:mb-6 animate-fade-up">
-          <p className="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-2">
-            Full-Stack Developer
-          </p>
-          <h1 className="font-serif text-4xl sm:text-5xl text-slate-900 mb-3">
-            Remy Post
-          </h1>
-          <p className="text-slate-500 max-w-lg xl:max-w-none">
-            I build full-stack applications with modern tools.
-            Clean code, thoughtful design, real results.
-          </p>
-        </div>
+        <PageHeader
+          label="Full-Stack Developer"
+          title="Remy Post"
+          description={["I build, modern, clear and functional full-stack applications. Clean code, thoughtful design, real results.", 
+            "I am a full-stack developer with a passion for building modern, clear and functional applications.",
+          "I am a full-stack developer with a passion for building modern, clear and functional applications.",
+          "I am a full-stack developer with a passion for building modern, clear and functional applications.",
+          ]}/>
 
         <div
           className="flex items-center gap-3 mb-10 xl:mb-0 animate-fade-up"
@@ -69,9 +62,7 @@ export default function Home() {
         <section>
           <div className="flex items-end justify-between mb-8">
             <div>
-              <p className="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-2">
-                Technologies
-              </p>
+              <SectionLabel className="mb-2">Technologies</SectionLabel>
               <h2 className="font-serif text-3xl text-slate-900">What I work with</h2>
             </div>
             <Link
@@ -99,9 +90,7 @@ export default function Home() {
         <section>
           <div className="flex items-end justify-between mb-8">
             <div>
-              <p className="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-2">
-                Work
-              </p>
+              <SectionLabel className="mb-2">Work</SectionLabel>
               <h2 className="font-serif text-3xl text-slate-900">Featured projects</h2>
             </div>
             <Link
@@ -121,9 +110,7 @@ export default function Home() {
 
         {/* Contact CTA */}
         <section>
-          <p className="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-3">
-            Get in touch
-          </p>
+          <SectionLabel className="mb-3">Get in touch</SectionLabel>
           <h2 className="font-serif text-3xl text-slate-900 mb-3">
             Let&apos;s work together
           </h2>

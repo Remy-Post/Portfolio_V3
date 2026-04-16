@@ -3,6 +3,8 @@
 import { useAppContext } from '../components/AppContext';
 import Language from '../components/Language';
 import { ILanguage } from '../../server/models/languages';
+import LoadingSpinner from '../components/LoadingSpinner';
+import PageHeader from '../components/PageHeader';
 import { useState } from 'react';
 
 const PROF_FILTERS = [
@@ -17,13 +19,7 @@ export default function TechStackPage() {
   const { languages, loading } = useAppContext();
   const [activeFilter, setActiveFilter] = useState(0);
 
-  if (loading) {
-    return (
-      <div className="section py-32 flex items-center justify-center">
-        <div className="h-8 w-8 border-2 border-slate-200 border-t-slate-600 rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner />;
 
   const filtered = activeFilter === 0
     ? languages
@@ -33,15 +29,11 @@ export default function TechStackPage() {
     <div className="section py-12 xl:grid xl:grid-cols-[1fr_3fr] xl:gap-12 xl:items-start">
       {/* Left: Header + Filters */}
       <div className="xl:sticky xl:top-20">
-        <div className="mb-10 xl:mb-6 animate-fade-up">
-          <p className="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-2">
-            Technologies
-          </p>
-          <h1 className="font-serif text-4xl sm:text-5xl text-slate-900 mb-3">Tech Stack</h1>
-          <p className="text-slate-500 max-w-lg xl:max-w-none">
-            The languages, frameworks, and tools I use to bring ideas to life.
-          </p>
-        </div>
+        <PageHeader
+          label="Technologies"
+          title="Tech Stack"
+          description="The languages, frameworks, and tools I use to bring ideas to life."
+        />
 
         {/* Filter tabs */}
         <div className="flex flex-wrap xl:flex-col gap-2 mb-8 xl:mb-0 animate-fade-up" style={{ animationDelay: '0.1s' }}>
